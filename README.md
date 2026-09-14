@@ -208,4 +208,4 @@ Normal — Kafka et PostgreSQL utilisent des protocoles binaires, pas du HTTP. U
 
 ## Auteur
 
-Hajar Fallaki
+Hajar ELFALLAKI-IDRISSI
