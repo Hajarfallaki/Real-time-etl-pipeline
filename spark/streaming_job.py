@@ -1,4 +1,6 @@
 from pyspark.sql import SparkSession
+from transformation import transform_transactions
+from load import write_to_postgres
 
 
 # ============================================================
@@ -19,7 +21,7 @@ spark.sparkContext.setLogLevel("WARN")
 # 2. Lire les données depuis Kafka
 # ============================================================
 
-df = (
+raw_df = (
     spark.readStream
     .format("kafka")
 
@@ -42,27 +44,28 @@ df = (
     )
 
     .load()
+
+    # Kafka stocke key et value sous forme de bytes.
+    # On transforme "value" en texte JSON.
+    .selectExpr("CAST(value AS STRING) AS value")
 )
 
 
 # ============================================================
-# 3. Transformer la valeur Kafka
+# 3. Transformer (parsing + validation + enrichissement)
 # ============================================================
 
-transactions = df.selectExpr(
-    "CAST(value AS STRING) AS value"
-)
+transactions = transform_transactions(raw_df)
 
 
 # ============================================================
-# 4. Afficher les transactions reçues
+# 4. Charger vers Postgres
 # ============================================================
 
 query = (
     transactions.writeStream
-    .format("console")
+    .foreachBatch(write_to_postgres)
     .outputMode("append")
-    .option("truncate", "false")
     .start()
 )
 

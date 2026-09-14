@@ -1,0 +1,3 @@
+﻿-- Ce script s'execute automatiquement au premier demarrage du conteneur Postgres
+-- La base "etl_db" est deja creee via POSTGRES_DB dans docker-compose.yml
+-- Ce fichier peut contenir des extensions ou roles additionnels si besoin plus tard
