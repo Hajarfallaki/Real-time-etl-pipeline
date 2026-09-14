@@ -6,21 +6,16 @@ from datetime import datetime, timezone
 from kafka import KafkaProducer
 
 
-# Connexion à Kafka
 producer = KafkaProducer(
     bootstrap_servers="localhost:9092",
     value_serializer=lambda value: json.dumps(value).encode("utf-8")
 )
 
-
-# Données possibles
 TRANSACTION_TYPES = ["PAYMENT", "TRANSFER", "WITHDRAWAL", "DEPOSIT"]
 STATUSES = ["SUCCESS", "FAILED"]
 
 
 def generate_transaction(transaction_number):
-    """Génère une transaction simulée."""
-
     return {
         "transaction_id": f"TX{transaction_number:04d}",
         "customer_id": f"C{random.randint(1, 100):03d}",
@@ -32,32 +27,17 @@ def generate_transaction(transaction_number):
 
 
 def send_transactions():
-    """Génère et envoie des transactions à Kafka."""
-
     transaction_number = 1
-
     try:
         while True:
-
             transaction = generate_transaction(transaction_number)
-
-            producer.send(
-                "transactions",
-                value=transaction
-            )
-
+            producer.send("transactions", value=transaction)
             producer.flush()
-
             print(f"Transaction envoyée : {transaction}")
-
             transaction_number += 1
-
-            # Simule l'arrivée de nouvelles transactions
             time.sleep(2)
-
     except KeyboardInterrupt:
         print("\nProducer arrêté.")
-
     finally:
         producer.close()
 
